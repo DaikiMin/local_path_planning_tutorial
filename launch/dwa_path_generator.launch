@@ -1,0 +1,39 @@
+<launch>
+    <arg name="comparison_mode"      default="false"/>
+    <arg name="base_footprint_name"  default="dwa"/>
+    <arg name="teleop_topic_name"    default="/dwa/input/teleop"/>
+    <arg name="odom_topic_name"      default="/dwa/odom"/>
+
+    <arg name="dwa_params"             default="$(find local_path_planning_tutorial)/param/dwa_params.yaml"/>
+    <arg name="path_generator_params"  default="$(find local_path_planning_tutorial)/param/path_generator_params.yaml"/>
+
+    <arg name="sensor_size"         default="50"/>
+
+    <arg name="rviz"                    default="true"/>
+    <arg name="rviz_cfg"                default="$(find local_path_planning_tutorial)/config/rviz/dwa.rviz"/>
+    <node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_cfg)"/>
+
+    <!-- leonard_jones_dwa -->
+    <group ns = "dwa_path_generator">
+        <node pkg="local_path_planning_tutorial" type="dynamic_window_approach_path_generator" name="dwa_path_generator" launch-prefix="xterm -font r16 -bg darkblue -e">
+            <param name="base_footprint_name"  type="str"     value="$(arg base_footprint_name)"/>
+            <param name="teleop_topic_name"    type="str"     value="$(arg teleop_topic_name)"/>
+            <param name="odom_topic_name"      type="str"     value="$(arg odom_topic_name)"/>
+            <rosparam file="$(arg dwa_params)"            command="load" />
+            <rosparam file="$(arg path_generator_params)" command="load" />
+        </node>
+    </group>
+
+    <group ns = "virtual_environment">
+        <node pkg="local_path_planning_tutorial" type="ppac_robot_pose_broadcaster" name="dwa_robot_pose_broadcaster">
+            <param name="base_footprint_name"  type="str"     value="$(arg base_footprint_name)"/>
+            <param name="teleop_topic_name"    type="str"     value="$(arg teleop_topic_name)"/>
+            <param name="odom_topic_name"      type="str"     value="$(arg odom_topic_name)"/>
+        </node>
+        
+        <node unless="$(arg comparison_mode)" pkg="local_path_planning_tutorial" type="ppac_virtual_environment" name="virtual_environment">
+            <param name="sensor_size"          type="int"     value="$(arg sensor_size)"/>
+        </node>
+    </group>
+</launch>
+

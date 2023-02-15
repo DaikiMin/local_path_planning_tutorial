@@ -1,0 +1,30 @@
+<launch>
+    <arg name="sensor_size"             default="50"/>
+
+    <arg name="rviz"                    default="true"/>
+    <arg name="rviz_cfg"                default="$(find local_path_planning_tutorial)/config/rviz/comparison.rviz"/>
+    <node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_cfg)"/>
+
+    
+    <include file="$(find local_path_planning_tutorial)/launch/potential_method_path_generator.launch" >
+        <arg name="comparison_mode"        value="true"/>
+        <arg name="weight_obstacle"        value="1.0"/>
+        <arg name="weight_goal"            value="3.0"/>
+        <arg name="delta"                  value="0.05"/>
+        <arg name="grid_width"             value="0.25"/>
+        <arg name="rviz"                   value="false"/>
+    </include>
+
+    <include file="$(find local_path_planning_tutorial)/launch/dwa_path_generator.launch" >
+        <arg name="comparison_mode"        value="true"/>
+        <arg name="dwa_params"             value="$(find local_path_planning_tutorial)/param/dwa_params.yaml"/>
+        <arg name="path_generator_params"  value="$(find local_path_planning_tutorial)/param/path_generator_params.yaml"/>
+        <arg name="rviz"                   value="false"/>
+    </include>
+
+    <group ns = "virtual_environment">
+        <node pkg="local_path_planning_tutorial" type="ppac_virtual_environment" name="virtual_environment">
+            <param name="sensor_size"          type="int"     value="$(arg sensor_size)"/>
+        </node>
+    </group>
+</launch>
